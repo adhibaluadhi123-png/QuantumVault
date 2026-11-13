@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumVault Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>QuantumVault</h1>
+    <p>Post-Quantum Secure Filesystem</p>
+
+    <section>
+        <h2>Vault Status</h2>
+        <p id="status">LOCKED</p>
+        <button onclick="unlockVault()">Unlock Vault</button>
+    </section>
+
+    <section>
+        <h2>Encryption</h2>
+        <p>Algorithm: ML-KEM-768 + AES-256-GCM</p>
+        <p>Filesystem: Rust + FUSE</p>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
