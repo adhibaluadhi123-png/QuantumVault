@@ -68,4 +68,14 @@ mod tests {
     fn test_unknown_error_mapping() {
         assert_eq!(check_status(-5), Err(CryptoError::UnknownStatus(-5)));
     }
+
+    #[test]
+    fn test_buffer_boundary_safety() {
+        let mut data = [0x10, 0x20, 0x30, 0x40];
+
+        let result = xor_buffer(&mut data[..2], 0xFF);
+
+        assert_eq!(result, Ok(()));
+        assert_eq!(data, [0xEF, 0xDF, 0x30, 0x40]);
+    }
 }
