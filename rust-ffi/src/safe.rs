@@ -1,13 +1,29 @@
+/// Errors returned by the C crypto engine.
+#[derive(Debug, PartialEq, Eq)]
+pub enum CryptoError {
+    NullPointer,
+    UnknownStatus(i32),
+}
+
+/// Converts C status codes into Rust errors.
+fn check_status(status: i32) -> Result<(), CryptoError> {
+    match status {
+        0 => Ok(()),
+        -1 => Err(CryptoError::NullPointer),
+        other => Err(CryptoError::UnknownStatus(other)),
+    }
+}
+
 /// Safely calls the C crypto_add function.
 pub fn safe_add(a: i32, b: i32) -> i32 {
     unsafe { crate::ffi::crypto_add(a, b) }
 }
 
 /// Applies XOR to a mutable byte buffer using C.
-pub fn xor_buffer(data: &mut [u8], key: u8) -> Result<(), i32> {
+pub fn xor_buffer(data: &mut [u8], key: u8) -> Result<(), CryptoError> {
     let status = unsafe { crate::ffi::crypto_xor_buffer(data.as_mut_ptr(), data.len(), key) };
 
-    if status == 0 { Ok(()) } else { Err(status) }
+    check_status(status)
 }
 
 #[cfg(test)]
@@ -42,9 +58,14 @@ mod tests {
     }
 
     #[test]
-    fn test_null_pointer_error_handling() {
-        let result = unsafe { crate::ffi::crypto_xor_buffer(std::ptr::null_mut(), 1, 0xFF) };
+    fn test_null_pointer_error_mapping() {
+        let status = unsafe { crate::ffi::crypto_xor_buffer(std::ptr::null_mut(), 1, 0xFF) };
 
-        assert_eq!(result, -1);
+        assert_eq!(check_status(status), Err(CryptoError::NullPointer));
+    }
+
+    #[test]
+    fn test_unknown_error_mapping() {
+        assert_eq!(check_status(-5), Err(CryptoError::UnknownStatus(-5)));
     }
 }
