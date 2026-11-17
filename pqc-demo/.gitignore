@@ -1,0 +1,5 @@
+# Compiled demo executable
+mlkem_demo
+
+# Object files
+*.o
