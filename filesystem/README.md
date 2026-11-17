@@ -1,26 +1,79 @@
+# Day 5 – QuantumVault Filesystem Architecture Review
 
-## Day 4 – Filesystem Testing and Validation
+## 1. Objective
 
-### Completed Tasks
-- Tested creation and management of multiple files.
-- Verified offset-based file reading.
-- Verified offset-based file writing.
-- Tested file truncation.
-- Tested large-file operations using a 108 KB test file.
-- Tested handling of nonexistent files.
-- Verified reading beyond EOF returns zero bytes.
-- Tested operations on an existing file.
+The objective of Day 5 was to review the existing Rust-based FUSE filesystem architecture and understand how it can be extended to support post-quantum cryptographic integration.
 
-### Test Results
-All the above test cases completed successfully.
+## 2. Existing Filesystem Architecture
 
-### Current Limitations
+The filesystem currently consists of three main structures.
+
+### FileEntry
+
+Stores information about individual files:
+
+- Inode number
+- File content
+- File permissions
+- Access time (atime)
+- Modification time (mtime)
+- Change time (ctime)
+
+### FileSystemState
+
+Maintains the filesystem's internal state:
+
+- `HashMap` for storing files.
+- `next_inode` for generating inode numbers.
+
+### QuantumVaultFS
+
+- Manages the filesystem state.
+- Uses `Mutex` for thread-safe access.
+- Handles filesystem operations through FUSE.
+
+## 3. Important Filesystem Operations Reviewed
+
+| Operation | Purpose |
+|---|---|
+| `read()` | Reads file contents using inode and offset. |
+| `write()` | Writes data into files. |
+| `getattr()` | Retrieves file metadata. |
+| `setattr()` | Updates permissions, file size and timestamps. |
+
+## 4. Current Implementation Limitations
+
+The architecture review identified the following limitations:
+
 - File contents are stored in memory.
-- Data is not persistent after unmounting.
-- Encryption and decryption are not integrated yet.
-- Directory creation and file deletion are not implemented yet.
+- File contents are currently stored as plaintext.
+- Data is not persistent after the filesystem process exits.
+- Post-quantum cryptography has not yet been integrated.
+- Encrypted storage will require additional metadata management.
 
-### Next Steps
-- Improve filesystem operation coverage.
-- Prepare the write interface for integration with the PQC cryptographic engine.
-- Coordinate the data exchange format with the cryptography team.
+## 5. Preparation for Cryptographic Integration
+
+The following changes will be required in future development:
+
+1. Integrate the cryptographic engine developed by Member 2.
+2. Encrypt file data before storing it.
+3. Decrypt file data when it is read.
+4. Maintain appropriate metadata for encrypted files.
+5. Separate logical file size from encrypted storage size.
+6. Coordinate the Rust FUSE interface with the C cryptographic engine.
+
+## 6. Important Technical Consideration
+
+ML-KEM is intended for key encapsulation rather than direct encryption of large files. A symmetric encryption algorithm will be needed for file contents, using a key derived from the ML-KEM shared secret.
+
+## 7. Day 5 Outcome
+
+- Reviewed the existing filesystem architecture.
+- Understood the responsibilities of the main filesystem structures.
+- Examined the read, write and metadata operations.
+- Identified current implementation limitations.
+- Prepared the architecture for future cryptographic integration.
+
+**Status:** Day 5 architecture review completed.
+
+**Next Step:** Begin Rust–C FFI integration and prepare the filesystem for communication with the cryptographic engine.
