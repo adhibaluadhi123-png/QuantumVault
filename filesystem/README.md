@@ -1,79 +1,108 @@
-# Day 5 – QuantumVault Filesystem Architecture Review
+# Day 6 – Rust–C FFI Integration
 
 ## 1. Objective
 
-The objective of Day 5 was to review the existing Rust-based FUSE filesystem architecture and understand how it can be extended to support post-quantum cryptographic integration.
+The objective of Day 6 was to understand and implement basic communication between Rust and C using the Foreign Function Interface (FFI).
 
-## 2. Existing Filesystem Architecture
+## 2. C Engine Development
 
-The filesystem currently consists of three main structures.
+Created the following files:
 
-### FileEntry
+- `c-engine/crypto.c`
+- `c-engine/crypto.h`
 
-Stores information about individual files:
+Implemented a basic C function:
 
-- Inode number
-- File content
-- File permissions
-- Access time (atime)
-- Modification time (mtime)
-- Change time (ctime)
+```c
+int add_numbers(int a, int b) {
+    return a + b;
+}
+```
 
-### FileSystemState
+This function was developed as an FFI practice exercise.
 
-Maintains the filesystem's internal state:
+## 3. Cargo Build Configuration
 
-- `HashMap` for storing files.
-- `next_inode` for generating inode numbers.
+Added the `cc` crate as a build dependency in `Cargo.toml`.
 
-### QuantumVaultFS
+Created `build.rs` to compile the C source file and link the resulting library with the Rust project.
 
-- Manages the filesystem state.
-- Uses `Mutex` for thread-safe access.
-- Handles filesystem operations through FUSE.
+## 4. Rust–C FFI Implementation
 
-## 3. Important Filesystem Operations Reviewed
+Created `src/bin/ffi_demo.rs`.
 
-| Operation | Purpose |
-|---|---|
-| `read()` | Reads file contents using inode and offset. |
-| `write()` | Writes data into files. |
-| `getattr()` | Retrieves file metadata. |
-| `setattr()` | Updates permissions, file size and timestamps. |
+Declared the C function using:
 
-## 4. Current Implementation Limitations
+```rust
+unsafe extern "C" {
+    fn add_numbers(a: i32, b: i32) -> i32;
+}
+```
 
-The architecture review identified the following limitations:
+Called the C function from Rust:
 
-- File contents are stored in memory.
-- File contents are currently stored as plaintext.
-- Data is not persistent after the filesystem process exits.
-- Post-quantum cryptography has not yet been integrated.
-- Encrypted storage will require additional metadata management.
+```rust
+let result = unsafe {
+    add_numbers(10, 20)
+};
+```
 
-## 5. Preparation for Cryptographic Integration
+## 5. Execution Result
 
-The following changes will be required in future development:
+Command:
 
-1. Integrate the cryptographic engine developed by Member 2.
-2. Encrypt file data before storing it.
-3. Decrypt file data when it is read.
-4. Maintain appropriate metadata for encrypted files.
-5. Separate logical file size from encrypted storage size.
-6. Coordinate the Rust FUSE interface with the C cryptographic engine.
+```bash
+cargo run --bin ffi_demo
+```
 
-## 6. Important Technical Consideration
+Output:
 
-ML-KEM is intended for key encapsulation rather than direct encryption of large files. A symmetric encryption algorithm will be needed for file contents, using a key derived from the ML-KEM shared secret.
+```text
+Result from C function: 30
+```
 
-## 7. Day 5 Outcome
+This confirmed successful communication between Rust and C.
 
-- Reviewed the existing filesystem architecture.
-- Understood the responsibilities of the main filesystem structures.
-- Examined the read, write and metadata operations.
-- Identified current implementation limitations.
-- Prepared the architecture for future cryptographic integration.
+## 6. Unit Testing
 
-**Status:** Day 5 architecture review completed.
+Implemented three Rust unit tests:
 
-**Next Step:** Begin Rust–C FFI integration and prepare the filesystem for communication with the cryptographic engine.
+1. `test_c_add_numbers`
+2. `test_negative_numbers`
+3. `test_zero_values`
+
+Command:
+
+```bash
+cargo test --bin ffi_demo
+```
+
+Result:
+
+- Total tests: 3
+- Passed: 3
+- Failed: 0
+
+## 7. Build Verification
+
+The following commands executed successfully:
+
+```bash
+cargo check
+cargo build
+cargo test
+```
+
+## 8. Day 6 Outcome
+
+- Understood the basics of Rust–C FFI.
+- Configured C compilation through Cargo.
+- Successfully called a C function from Rust.
+- Verified function results through automated unit tests.
+- Established a foundation for future integration with the cryptographic engine.
+
+**Status:** Basic Rust–C FFI integration completed.
+
+**Next Step:** Study and integrate the actual cryptographic engine API developed by Member 2.
+
+**Note:** The `add_numbers()` function is an FFI demonstration, not a cryptographic function. Post-quantum encryption has not yet been implemented.
