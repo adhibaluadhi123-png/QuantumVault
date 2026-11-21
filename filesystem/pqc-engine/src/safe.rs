@@ -35,6 +35,10 @@ impl SecretBytes {
     pub fn as_slice(&self) -> &[u8] {
         &self.bytes
     }
+    
+    pub fn as_mut_slice(&mut self) -> &mut [u8] {
+        &mut self.bytes
+    }
 
     pub fn len(&self) -> usize {
         self.bytes.len()
