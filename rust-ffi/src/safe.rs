@@ -46,6 +46,39 @@ pub struct MlKem768KeyPair {
     secret_key: SecretBytes,
 }
 
+impl MlKem768KeyPair {
+    /// Provides crate-internal read-only access to the secret key.
+    ///
+    /// This is used by the protected key-storage module.
+    pub(crate) fn secret_key_bytes(&self) -> &[u8] {
+        self.secret_key.as_bytes()
+    }
+
+    /// Restores a keypair from its public and secret key components.
+    ///
+    /// The secret key is immediately wrapped in SecretBytes so it is
+    /// cleansed when dropped, including when validation fails.
+    pub(crate) fn from_parts(
+        public_key: Vec<u8>,
+        secret_key: Vec<u8>,
+    ) -> Result<Self, CryptoError> {
+        let secret_key = SecretBytes(secret_key);
+
+        let (expected_public_len, expected_secret_len, _, _) = mlkem768_get_sizes()?;
+
+        if public_key.len() != expected_public_len
+            || secret_key.as_bytes().len() != expected_secret_len
+        {
+            return Err(CryptoError::InvalidLength);
+        }
+
+        Ok(Self {
+            public_key,
+            secret_key,
+        })
+    }
+}
+
 /// The ciphertext and shared secret produced by encapsulation.
 pub struct MlKem768Encapsulation {
     pub ciphertext: Vec<u8>,
@@ -247,6 +280,30 @@ mod tests {
     #[test]
     fn test_mlkem768_rejects_invalid_public_key_length() {
         let result = mlkem768_encapsulate(&[]);
+
+        assert!(matches!(result, Err(CryptoError::InvalidLength)));
+    }
+
+    #[test]
+    fn test_mlkem768_keypair_restore() {
+        let original = mlkem768_keypair().unwrap();
+
+        let restored = MlKem768KeyPair::from_parts(
+            original.public_key.clone(),
+            original.secret_key_bytes().to_vec(),
+        )
+        .unwrap();
+
+        let encapsulation = mlkem768_encapsulate(&restored.public_key).unwrap();
+
+        let recovered = mlkem768_decapsulate(&encapsulation.ciphertext, &restored).unwrap();
+
+        assert_eq!(encapsulation.shared_secret.as_bytes(), recovered.as_bytes());
+    }
+
+    #[test]
+    fn test_mlkem768_keypair_restore_rejects_invalid_lengths() {
+        let result = MlKem768KeyPair::from_parts(vec![0u8; 10], vec![0u8; 20]);
 
         assert!(matches!(result, Err(CryptoError::InvalidLength)));
     }

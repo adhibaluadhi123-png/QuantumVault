@@ -1,4 +1,7 @@
+pub mod encryption;
 pub mod ffi;
+pub mod key_management;
+pub mod recipient_encryption;
 pub mod safe;
 
 pub fn add(left: u64, right: u64) -> u64 {
