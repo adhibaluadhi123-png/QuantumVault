@@ -1,0 +1,31 @@
+# Rust build artifacts
+/target/
+/filesystem/target/
+
+# Generated C demo binaries
+/pqc-demo/hybrid_crypto_demo
+/pqc-demo/hybrid_disk_roundtrip
+
+# Generated C demo test files
+/c_demo_input.txt
+/c_demo_encrypted.qv
+/c_demo_recovered.txt
+/c_disk_roundtrip.qv
+/c_disk_recovered.txt
+
+# Temporary files
+*.o
+*.log
+# Local audit plaintext evidence
+/reports/crypto-audit/audit_input_*.txt
+/reports/crypto-audit/audit_recovered_*.txt
+
+# Older audit evidence
+/reports/crypto-audit/audit_encrypted_5201.qv
+
+# Original documentation backup
+/filesystem/README_day6_backup.md
+
+# Unused duplicate cryptographic engine copy
+/filesystem/pqc-engine/
+/reports/crypto-audit/audit_encrypted_6585.qv
