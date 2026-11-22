@@ -6,3 +6,6 @@ pub mod safe;
 
 #[path = "../pqc-engine/src/key_derivation.rs"]
 pub mod key_derivation;
+
+#[path = "../pqc-engine/src/encryption.rs"]
+pub mod encryption;
