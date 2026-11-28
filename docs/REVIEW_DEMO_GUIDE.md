@@ -29,3 +29,21 @@ The FUSE-based filesystem provides a mounted view of files while storing encrypt
 
 ## Limitations
 This project is a prototype and is not a formally certified production cryptographic system.
+## FUSE Practical Demonstration
+
+1. Start filesystem: `cd ~/QuantumVault/filesystem && cargo run --bin filesystem`
+2. Verify mount: `mountpoint /tmp/quantumvault_mount`
+3. Create sample file: `echo "QuantumVault reviewer demo file." > ~/reviewer_demo.txt`
+4. Copy file into FUSE: `cp ~/reviewer_demo.txt /tmp/quantumvault_mount/reviewer_demo.txt`
+5. Read through FUSE: `cat /tmp/quantumvault_mount/reviewer_demo.txt`
+6. Inspect backend: `ls -lh ~/.local/share/quantumvault/files/`
+
+## Practical Validation
+
+- FUSE filesystem startup and mount verified.
+- File creation and reading through mounted directory verified.
+- Corresponding encrypted `.qv` backend container observed.
+- Standalone C hybrid encryption demonstration passed.
+- Rust-C FFI tests previously passed.
+
+Note: FUSE file storage and standalone C encryption are separate demonstrations. End-to-end decryption of a FUSE-stored file requires separate validation.
